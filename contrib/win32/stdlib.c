@@ -39,19 +39,29 @@ int setenv(const char *name, const char *value, int overwrite)
 {
   char *env = getenv(name);
   if ((env && overwrite) || (!env)) {
-    char *str[32];
-    strcpy(str, name);
-    strcat(str, "=");
-    strcat(str, value);
-    return putenv(str);
+    int len = strlen( name ) + 1 + strlen( value ) + 1;
+    char *str = (char *)malloc( len );
+    if( str != NULL )
+    {
+      strcpy(str, name);
+      strcat(str, "=");
+      strcat(str, value);
+      free( str );
+      return putenv(str);
+    }
   }
   return -1;
 }
 
 void unsetenv(const char *name)
 {
-  char *str[32];
-  strcpy(str, name);
-  strcat(str, "=");
-  putenv(str);
+  int len = strlen( name ) + 1 + 1;
+  char *str = (char *)malloc( len );
+  if( str != NULL )
+  {
+    strcpy(str, name);
+    strcat(str, "=");
+    putenv(str);
+    free( str );
+  }
 }

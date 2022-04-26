@@ -204,7 +204,7 @@ acr122s_send_frame(nfc_device *pnd, uint8_t *frame, int timeout)
 #ifndef WIN32
   abort_p = &(DRIVER_DATA(pnd)->abort_fds[1]);
 #else
-  abort_p = &(DRIVER_DATA(pnd)->abort_flag);
+  abort_p = (void *)(&(DRIVER_DATA(pnd)->abort_flag));
 #endif
 
   if ((ret = uart_send(port, frame, frame_size, timeout)) < 0)
@@ -684,7 +684,7 @@ acr122s_receive(nfc_device *pnd, uint8_t *buf, size_t buf_len, int timeout)
 #ifndef WIN32
   abort_p = &(DRIVER_DATA(pnd)->abort_fds[1]);
 #else
-  abort_p = &(DRIVER_DATA(pnd)->abort_flag);
+  abort_p = (void *)&(DRIVER_DATA(pnd)->abort_flag);
 #endif
 
   uint8_t tmp[MAX_FRAME_SIZE];

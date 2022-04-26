@@ -44,9 +44,9 @@
 */
 #    define snprintf(S, n, ...) sprintf(S, __VA_ARGS__)
 #    define pipe(fds) _pipe(fds, 5000, _O_BINARY)
-#    define ETIMEDOUT     WSAETIMEDOUT
-#    define ENOTSUP       WSAEOPNOTSUPP
-#    define ECONNABORTED  WSAECONNABORTED
+//#    define ETIMEDOUT     WSAETIMEDOUT
+//#    define ENOTSUP       WSAEOPNOTSUPP
+//#    define ECONNABORTED  WSAECONNABORTED
 #  else
 #ifndef _MSC_VER
 #    define snprintf sprintf_s
