@@ -93,6 +93,8 @@ static uint8_t keys[] = {
 static uint8_t default_key[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 static uint8_t default_acl[] = {0xff, 0x07, 0x80, 0x69};
 
+static bool bCorrectSAK = false;
+
 static const nfc_modulation nmMifare = {
   .nmt = NMT_ISO14443A,
   .nbr = NBR_106,
@@ -478,6 +480,12 @@ write_card(bool write_block_zero)
               printf("Expecting BCC=%02X\n", mp.mpd.abtData[0] ^ mp.mpd.abtData[1] ^ mp.mpd.abtData[2] ^ mp.mpd.abtData[3]);
               return false;
             }
+
+            // if dumped SAK = 0x88, make it 0x08
+            if( bCorrectSAK && mp.mpd.abtData[5] == 0x88 ) {
+              mp.mpd.abtData[5] = 0x08;
+              printf( "SAK: 0x88 -> 0x08\n" );
+            }
           }
           if (!nfc_initiator_mifare_cmd(pnd, MC_WRITE, uiBlock, &mp)) {
             bFailure = true;
@@ -533,6 +541,7 @@ print_usage(const char *pcProgramName)
   printf("                  *** unlocked read does not require authentication and will reveal A and B keys\n");
   printf("                  *** note that block 0 write will attempt to overwrite block 0 including UID\n");
   printf("                  *** block 0 write only works with special Mifare cards (Chinese clones)\n");
+  printf("                  *** use w+ or W+ to correct SAK byte (0x88 -> 0x08)\n");
   printf("  a|A|b|B       - Use A or B keys for action; Halt on errors (a|b) or tolerate errors (A|B)\n");
   printf("  u|U           - Use any (u) uid or supply a uid specifically as U01ab23cd.\n");
   printf("  <dump.mfd>    - MiFare Dump (MFD) used to write (card to MFD) or (MFD to card)\n");
@@ -584,10 +593,14 @@ main(int argc, const char *argv[])
     bTolerateFailures = tolower((int)((unsigned char) * (argv[2]))) != (int)((unsigned char) * (argv[2]));
     bUseKeyFile = (argc > 5) && strcmp(argv[5], "v");
     bForceKeyFile = ((argc > 6) && (strcmp((char *)argv[6], "f") == 0));
-  } else if (strcmp(command, "w") == 0 || strcmp(command, "W") == 0 || strcmp(command, "f") == 0) {
+  } else if (strcmp(command, "w") == 0 || strcmp(command, "W") == 0 || strcmp(command, "f") == 0 || strcmp(command, "w+") == 0 || strcmp(command, "W+") == 0) {
     atAction = ACTION_WRITE;
-    if (strcmp(command, "W") == 0)
+//    if (strcmp(command, "W") == 0)
+    if( command[0] == 'W' )
       unlock = true;
+    if( command[1] == '+' ) {
+      bCorrectSAK = true;
+    }
     bFormatCard = (strcmp(command, "f") == 0);
     bUseKeyA = tolower((int)((unsigned char) * (argv[2]))) == 'a';
     bTolerateFailures = tolower((int)((unsigned char) * (argv[2]))) != (int)((unsigned char) * (argv[2]));
